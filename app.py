@@ -181,7 +181,6 @@ st.markdown("""
     letter-spacing: 0.12em;
     color: #6b7280;
     margin-bottom: 0.25rem;
-    text-transform: lowercase;
 }
 
 .app-version {
