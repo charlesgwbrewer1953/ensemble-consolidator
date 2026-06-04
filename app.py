@@ -165,9 +165,39 @@ def build_xlsx(averaged: dict, fn, all_data: dict) -> tuple[io.BytesIO, list[dic
     return buf, summary_rows
 
 
+APP_VERSION = "v 1.0.0"
+
 # ─── PAGE CONFIG ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Ensemble Consolidator", page_icon="📊", layout="wide")
+
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+
+.dk-brand {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    font-size: 1.05rem;
+    letter-spacing: 0.12em;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+    text-transform: lowercase;
+}
+
+.app-version {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    font-size: 0.78rem;
+    color: #9ca3af;
+    margin-top: -0.9rem;
+    margin-bottom: 1.5rem;
+}
+</style>
+<p class="dk-brand">demographiKon</p>
+""", unsafe_allow_html=True)
+
 st.title("📊 Ensemble Spreadsheet Consolidator")
+st.markdown(f'<p class="app-version">{APP_VERSION}</p>', unsafe_allow_html=True)
 
 # ─── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
