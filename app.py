@@ -165,10 +165,10 @@ def build_xlsx(averaged: dict, fn, all_data: dict) -> tuple[io.BytesIO, list[dic
     return buf, summary_rows
 
 
-APP_VERSION = "v 1.0.0"
+APP_VERSION = "v 1.7.0"
 
 # ─── PAGE CONFIG ───────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Ensemble Consolidator", page_icon="📊", layout="wide")
+st.set_page_config(page_title="AI Ensemble Consolidator", page_icon="📊", layout="wide")
 
 st.markdown("""
 <style>
@@ -195,7 +195,7 @@ st.markdown("""
 <p class="dk-brand">demographiKon</p>
 """, unsafe_allow_html=True)
 
-st.title("📊 Ensemble Spreadsheet Consolidator")
+st.title("📊 AI Ensemble Consolidator")
 st.markdown(f'<p class="app-version">{APP_VERSION}</p>', unsafe_allow_html=True)
 
 # ─── SIDEBAR ───────────────────────────────────────────────────────────────────
