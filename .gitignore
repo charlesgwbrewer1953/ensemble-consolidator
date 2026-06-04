@@ -1,0 +1,16 @@
+# Excel temp/lock files
+~$*.xlsx
+
+# Generated output files (downloaded from the app)
+Ensemble_Output*.xlsx
+
+# Source data files (uploaded via the app, not stored in repo)
+*.xlsx
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# macOS
+.DS_Store
