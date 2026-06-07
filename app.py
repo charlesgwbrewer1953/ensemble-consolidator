@@ -179,7 +179,7 @@ def build_xlsx(averaged: dict, fn, all_data: dict, transform_weight: bool = True
     return buf, summary_rows
 
 
-APP_VERSION = "v 1.8.0"
+APP_VERSION = "v 1.8.1"
 
 # ─── PAGE CONFIG ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="AI Ensemble Consolidator", page_icon="📊", layout="wide")
