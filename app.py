@@ -268,6 +268,12 @@ source_mode = st.radio(
     help="Use 'Local folder path' when running on this machine to avoid browser upload limits.",
 )
 
+# Clear cached data when the user switches source mode.
+if st.session_state.get("_source_mode") != source_mode:
+    st.session_state["_source_mode"] = source_mode
+    st.session_state.pop("_all_data",    None)
+    st.session_state.pop("_file_labels", None)
+
 all_data: dict | None = None
 file_labels: list[str] = []
 
@@ -280,6 +286,13 @@ if source_mode == "Upload files":
     if uploaded_files:
         file_labels = [f.name for f in uploaded_files]
         all_data = load_from_uploads(uploaded_files)
+        st.session_state["_all_data"]    = all_data
+        st.session_state["_file_labels"] = file_labels
+    else:
+        # Restore data after a re-render triggered by another widget (e.g. the
+        # Weight checkbox), which can clear the file uploader's browser state.
+        all_data    = st.session_state.get("_all_data")
+        file_labels = st.session_state.get("_file_labels", [])
 
 else:  # Local folder path
     default_path = str(os.path.expanduser("~/Desktop/Ensemble/"))
@@ -306,6 +319,8 @@ else:  # Local folder path
                 file_labels = [os.path.basename(p) for p in paths]
                 st.info(f"Found {len(paths)} file(s): {', '.join(file_labels)}")
                 all_data = load_from_paths(paths)
+                st.session_state["_all_data"]    = all_data
+                st.session_state["_file_labels"] = file_labels
 
 # ─── GENERATE ──────────────────────────────────────────────────────────────────
 if all_data is None:
