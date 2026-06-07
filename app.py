@@ -17,12 +17,13 @@ SHEET_ALIASES = {
 }
 
 FUNCTION_LABELS = {
-    "null":      "Null — plain average (identity)",
-    "squared":   "Squared  x²",
-    "cubed":     "Cubed  x³",
-    "lonn":      "Natural log  ln(x)",
-    "cos":       "Cosine  cos(x)",
-    "logistic":  "Logistic  p = 1 / (1 + e^(−kx))",
+    "null":         "Null — plain average (identity)",
+    "squared":      "Squared  x²",
+    "cubed":        "Cubed  x³",
+    "lonn":         "Natural log  ln(x)",
+    "cos":          "Cosine  cos(x)",
+    "logistic":     "Logistic  p = 1 / (1 + e^(−kx))",
+    "exponential":  "Exponential  y^x",
 }
 
 # ─── HELPERS ───────────────────────────────────────────────────────────────────
@@ -31,7 +32,7 @@ def normalise_sheet(name: str) -> str:
     return SHEET_ALIASES.get(upper, upper)
 
 
-def make_transform(name: str, k: float = 1.0):
+def make_transform(name: str, k: float = 1.0, y: float = 2.0):
     if name == "null":
         return lambda x: x
     if name == "squared":
@@ -49,6 +50,14 @@ def make_transform(name: str, k: float = 1.0):
             except OverflowError:
                 return 0.0 if x < 0 else 1.0
         return logistic
+    if name == "exponential":
+        def exponential(x):
+            try:
+                result = y ** x
+                return float("nan") if isinstance(result, complex) else result
+            except (ZeroDivisionError, OverflowError):
+                return float("nan")
+        return exponential
     raise ValueError(f"Unknown function: {name}")
 
 
@@ -118,7 +127,7 @@ def average_sheets(dfs: list[pd.DataFrame]):
     return avg_df, lbl_df
 
 
-def apply_transform(avg_df: pd.DataFrame, lbl_df: pd.DataFrame, fn) -> pd.DataFrame:
+def apply_transform(avg_df: pd.DataFrame, lbl_df: pd.DataFrame, fn, transform_weight: bool = True) -> pd.DataFrame:
     max_rows, max_cols = avg_df.shape
     result = pd.DataFrame(np.nan, index=range(max_rows), columns=range(max_cols), dtype=object)
 
@@ -127,20 +136,25 @@ def apply_transform(avg_df: pd.DataFrame, lbl_df: pd.DataFrame, fn) -> pd.DataFr
             v   = avg_df.iat[r, c]
             lbl = lbl_df.iat[r, c]
             if isinstance(v, float) and not math.isnan(v):
-                result.iat[r, c] = v if v == MISSING_SENTINEL else fn(v)
+                if v == MISSING_SENTINEL:
+                    result.iat[r, c] = v
+                elif c == 1 and not transform_weight:
+                    result.iat[r, c] = v
+                else:
+                    result.iat[r, c] = fn(v)
             elif isinstance(lbl, str):
                 result.iat[r, c] = lbl
 
     return result
 
 
-def build_xlsx(averaged: dict, fn, all_data: dict) -> tuple[io.BytesIO, list[dict]]:
+def build_xlsx(averaged: dict, fn, all_data: dict, transform_weight: bool = True) -> tuple[io.BytesIO, list[dict]]:
     buf = io.BytesIO()
     summary_rows = []
 
     with pd.ExcelWriter(buf, engine="openpyxl") as writer:
         for tab, (avg_df, lbl_df) in averaged.items():
-            result_df = apply_transform(avg_df, lbl_df, fn)
+            result_df = apply_transform(avg_df, lbl_df, fn, transform_weight)
 
             numeric_vals = [
                 result_df.iat[r, c]
@@ -165,7 +179,7 @@ def build_xlsx(averaged: dict, fn, all_data: dict) -> tuple[io.BytesIO, list[dic
     return buf, summary_rows
 
 
-APP_VERSION = "v 1.7.0"
+APP_VERSION = "v 1.8.0"
 
 # ─── PAGE CONFIG ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="AI Ensemble Consolidator", page_icon="📊", layout="wide")
@@ -221,13 +235,29 @@ with st.sidebar:
         )
         st.latex(r"p = \frac{1}{1 + e^{-kx}},\quad k=" + f"{k:.1f}")
 
+    y = 2.0
+    if selected_fn == "exponential":
+        st.markdown("### Exponential parameter")
+        y = st.slider(
+            "y",
+            min_value=-3.0,
+            max_value=3.0,
+            value=2.0,
+            step=0.1,
+            help="Base of the exponential. Cell value is the exponent.",
+        )
+        st.latex(r"y^x,\quad y=" + f"{y:.1f}")
+
     output_stem = (
         f"Ensemble_Output_logistic_k{k:.1f}"
         if selected_fn == "logistic"
+        else f"Ensemble_Output_exponential_y{y:.1f}"
+        if selected_fn == "exponential"
         else f"Ensemble_Output_{selected_fn}"
     )
 
     st.markdown("---")
+    transform_weight = st.checkbox("Apply transform to Weight column", value=True)
     st.markdown(f"**Output filename**  \n`{output_stem}.xlsx`")
 
 # ─── SOURCE SELECTION ──────────────────────────────────────────────────────────
@@ -288,8 +318,8 @@ if st.button("Generate", type="primary"):
         averaged = {tab: average_sheets(dfs) for tab, dfs in sorted(all_data.items())}
 
     with st.spinner("Applying transform and writing output…"):
-        fn = make_transform(selected_fn, k)
-        xlsx_buf, summary_rows = build_xlsx(averaged, fn, all_data)
+        fn = make_transform(selected_fn, k, y)
+        xlsx_buf, summary_rows = build_xlsx(averaged, fn, all_data, transform_weight)
 
     st.success("Done!")
 

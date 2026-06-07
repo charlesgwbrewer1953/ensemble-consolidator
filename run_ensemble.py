@@ -13,12 +13,25 @@ import pandas as pd
 
 MISSING_SENTINEL = -3  # cells with this value are treated as missing; not transformed
 
+EXPONENTIAL_Y    = 2.0   # base for exponential transform y^x; change as needed
+TRANSFORM_WEIGHT = True  # set False to leave Weight column (col 1) untransformed
+
+
+def _exp_transform(x):
+    try:
+        result = EXPONENTIAL_Y ** x
+        return float("nan") if isinstance(result, complex) else result
+    except (ZeroDivisionError, OverflowError):
+        return float("nan")
+
+
 TRANSFORMS = {
-    "null":    lambda x: x,
-    "squared": lambda x: x ** 2,
-    "cubed":   lambda x: x ** 3,
-    "lonn":    lambda x: math.log(x) if x > 0 else float("nan"),
-    "cos":     lambda x: math.cos(x),
+    "null":        lambda x: x,
+    "squared":     lambda x: x ** 2,
+    "cubed":       lambda x: x ** 3,
+    "lonn":        lambda x: math.log(x) if x > 0 else float("nan"),
+    "cos":         lambda x: math.cos(x),
+    "exponential": _exp_transform,
 }
 
 # Normalise variant sheet names to a single canonical key
@@ -100,7 +113,7 @@ def average_sheets(dfs: list[pd.DataFrame]) -> tuple[pd.DataFrame, pd.DataFrame]
 
     return avg_result, label_result
 
-def apply_transform(avg_df: pd.DataFrame, label_df: pd.DataFrame, fn) -> pd.DataFrame:
+def apply_transform(avg_df: pd.DataFrame, label_df: pd.DataFrame, fn, transform_weight: bool = True) -> pd.DataFrame:
     """Build output DataFrame: transform numeric cells, restore text labels."""
     max_rows, max_cols = avg_df.shape
     result = pd.DataFrame(np.nan, index=range(max_rows), columns=range(max_cols), dtype=object)
@@ -111,6 +124,8 @@ def apply_transform(avg_df: pd.DataFrame, label_df: pd.DataFrame, fn) -> pd.Data
             lbl = label_df.iat[r, c]
             if isinstance(v, float) and not math.isnan(v):
                 if v == MISSING_SENTINEL:
+                    result.iat[r, c] = v
+                elif c == 1 and not transform_weight:
                     result.iat[r, c] = v
                 else:
                     result.iat[r, c] = fn(v)
@@ -130,12 +145,16 @@ for tab, dfs in sorted(all_data.items()):
 all_summaries = []
 
 for transform_name, fn in TRANSFORMS.items():
-    output_path = os.path.join(path, f"Ensemble_Output_{transform_name}.xlsx")
+    if transform_name == "exponential":
+        stem = f"Ensemble_Output_exponential_y{EXPONENTIAL_Y:.1f}"
+    else:
+        stem = f"Ensemble_Output_{transform_name}"
+    output_path = os.path.join(path, f"{stem}.xlsx")
     summary: list[dict] = []
 
     with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
         for tab, (avg_df, label_df) in averaged.items():
-            result_df = apply_transform(avg_df, label_df, fn)
+            result_df = apply_transform(avg_df, label_df, fn, TRANSFORM_WEIGHT)
 
             numeric_vals = [
                 result_df.iat[r, c]
@@ -156,7 +175,7 @@ for transform_name, fn in TRANSFORMS.items():
             result_df.to_excel(writer, sheet_name=tab[:31], index=False, header=False)
 
     all_summaries.append((transform_name, output_path, summary))
-    print(f"\nSaved: Ensemble_Output_{transform_name}.xlsx")
+    print(f"\nSaved: {stem}.xlsx")
 
 # ─── EXAMINE OUTPUT ────────────────────────────────────────────────────────────
 print()
