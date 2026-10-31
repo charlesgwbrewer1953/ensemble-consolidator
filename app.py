@@ -179,17 +179,20 @@ def build_xlsx(averaged: dict, fn, all_data: dict, transform_weight: bool = True
     return buf, summary_rows
 
 
-APP_VERSION = "v 1.9.0"
+APP_VERSION = "v 1.9.1"
 
 # ─── PAGE CONFIG ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="AI Ensemble Consolidator", page_icon="📊", layout="wide")
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;500&display=swap');
 
 /* demographikon dark tokens */
 :root {
+    --dk-font-sans: 'Roboto', sans-serif;
+    --dk-font-weight-light: 300;
+    --dk-font-weight-medium: 500;
     --dk-bg: #050505;
     --dk-surface: #0b0b0b;
     --dk-surface-raised: #101010;
@@ -198,6 +201,16 @@ st.markdown("""
     --dk-text-secondary: #c0c0c0;
     --dk-border: rgba(255,255,255,0.15);
     --dk-border-strong: rgba(255,255,255,0.25);
+}
+
+/* global font — matches Shiny apps */
+.stApp, .stApp * {
+    font-family: var(--dk-font-sans) !important;
+    font-weight: var(--dk-font-weight-light);
+}
+
+h1, h2, h3, [data-testid="stHeadingWithActionElements"] {
+    font-weight: var(--dk-font-weight-medium) !important;
 }
 
 /* main background */
@@ -277,8 +290,8 @@ input[type="text"], textarea {
 
 /* brand header */
 .dk-brand {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 300;
+    font-family: var(--dk-font-sans) !important;
+    font-weight: var(--dk-font-weight-light) !important;
     font-size: 1.05rem;
     letter-spacing: 0.12em;
     color: var(--dk-text-secondary);
@@ -286,8 +299,8 @@ input[type="text"], textarea {
 }
 
 .app-version {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 300;
+    font-family: var(--dk-font-sans) !important;
+    font-weight: var(--dk-font-weight-light) !important;
     font-size: 0.78rem;
     color: var(--dk-text-secondary);
     opacity: 0.6;
