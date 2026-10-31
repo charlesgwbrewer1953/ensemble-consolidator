@@ -179,7 +179,7 @@ def build_xlsx(averaged: dict, fn, all_data: dict, transform_weight: bool = True
     return buf, summary_rows
 
 
-APP_VERSION = "v 1.9.1"
+APP_VERSION = "v 1.9.2"
 
 # ─── PAGE CONFIG ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="AI Ensemble Consolidator", page_icon="📊", layout="wide")
@@ -441,7 +441,7 @@ if st.button("Generate", type="primary"):
     st.success("Done!")
 
     st.download_button(
-        label=f"⬇️  Download  {output_stem}.xlsx",
+        label="Download",
         data=xlsx_buf,
         file_name=f"{output_stem}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
