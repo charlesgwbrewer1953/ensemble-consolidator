@@ -179,7 +179,7 @@ def build_xlsx(averaged: dict, fn, all_data: dict, transform_weight: bool = True
     return buf, summary_rows
 
 
-APP_VERSION = "v 1.8.1"
+APP_VERSION = "v 1.9.0"
 
 # ─── PAGE CONFIG ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="AI Ensemble Consolidator", page_icon="📊", layout="wide")
@@ -188,12 +188,100 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
 
+/* demographikon dark tokens */
+:root {
+    --dk-bg: #050505;
+    --dk-surface: #0b0b0b;
+    --dk-surface-raised: #101010;
+    --dk-surface-highlight: rgba(255,255,255,0.06);
+    --dk-text-primary: #f4f4f4;
+    --dk-text-secondary: #c0c0c0;
+    --dk-border: rgba(255,255,255,0.15);
+    --dk-border-strong: rgba(255,255,255,0.25);
+}
+
+/* main background */
+.stApp, [data-testid="stAppViewContainer"],
+[data-testid="stHeader"], [data-testid="stToolbar"] {
+    background-color: var(--dk-bg) !important;
+}
+
+/* sidebar */
+[data-testid="stSidebar"], [data-testid="stSidebarContent"] {
+    background-color: var(--dk-surface) !important;
+    border-right: 1px solid var(--dk-border) !important;
+}
+
+/* inputs and selects */
+[data-testid="stSelectbox"] > div > div,
+[data-testid="stTextInput"] > div > div > input,
+.stSlider [data-testid="stThumbValue"],
+input, select, textarea {
+    color: var(--dk-text-primary) !important;
+}
+
+input[type="text"], textarea {
+    background-color: var(--dk-surface-raised) !important;
+    border-color: var(--dk-border-strong) !important;
+}
+
+/* dataframe */
+[data-testid="stDataFrame"] {
+    border: 1px solid var(--dk-border) !important;
+    border-radius: 4px;
+}
+
+/* buttons */
+.stButton > button,
+.stDownloadButton > button {
+    background-color: var(--dk-surface-raised) !important;
+    color: var(--dk-text-primary) !important;
+    border: 1px solid var(--dk-border-strong) !important;
+}
+.stButton > button:hover,
+.stDownloadButton > button:hover {
+    background-color: var(--dk-surface-highlight) !important;
+    border-color: var(--dk-text-secondary) !important;
+}
+
+/* primary buttons */
+.stButton > button[kind="primary"],
+.stDownloadButton > button[kind="primary"] {
+    background-color: var(--dk-surface-raised) !important;
+    color: var(--dk-text-primary) !important;
+    border: 1px solid var(--dk-border-strong) !important;
+}
+
+/* alerts */
+[data-testid="stAlert"] {
+    background-color: var(--dk-surface-raised) !important;
+    border-color: var(--dk-border) !important;
+}
+
+/* radio and checkbox labels */
+.stRadio label, .stCheckbox label {
+    color: var(--dk-text-primary) !important;
+}
+
+/* file uploader */
+[data-testid="stFileUploader"] {
+    background-color: var(--dk-surface-raised) !important;
+    border-color: var(--dk-border) !important;
+    border-radius: 4px;
+}
+
+/* spinner */
+.stSpinner > div {
+    border-top-color: var(--dk-text-secondary) !important;
+}
+
+/* brand header */
 .dk-brand {
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
     font-size: 1.05rem;
     letter-spacing: 0.12em;
-    color: #6b7280;
+    color: var(--dk-text-secondary);
     margin-bottom: 0.25rem;
 }
 
@@ -201,7 +289,8 @@ st.markdown("""
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
     font-size: 0.78rem;
-    color: #9ca3af;
+    color: var(--dk-text-secondary);
+    opacity: 0.6;
     margin-top: -0.9rem;
     margin-bottom: 1.5rem;
 }

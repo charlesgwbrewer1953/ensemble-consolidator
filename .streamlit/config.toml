@@ -1,4 +1,7 @@
-[server]
-enableXsrfProtection = false
-enableCORS = false
-maxUploadSize = 200
+[theme]
+base = "dark"
+primaryColor = "#c0c0c0"
+backgroundColor = "#050505"
+secondaryBackgroundColor = "#0b0b0b"
+textColor = "#f4f4f4"
+font = "sans serif"
